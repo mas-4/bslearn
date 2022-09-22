@@ -42,18 +42,12 @@ int save_network(LayerDenseNetwork *network, const char *filename)
     {
         return 1;
     }
-    fprintf(fp, "%zu", network->num_layers);
+    fwrite(&network->num_layers, sizeof(size_t), 1, fp);
     for (size_t i = 0; i < network->num_layers; i++)
     {
-        fprintf(fp, "%zu", network->layers[i].nodes);
-        for (size_t j = 0; j < network->layers[i].nodes; j++)
-        {
-            fprintf(fp, "%f", network->layers[i].weights[j]);
-        }
-        for (size_t j = 0; j < network->layers[i].nodes; j++)
-        {
-            fprintf(fp, "%f", network->layers[i].biases[j]);
-        }
+        fwrite(&network->layers[i].nodes, sizeof(size_t), 1, fp);
+        fwrite(network->layers[i].weights, sizeof(double), network->layers[i].nodes, fp);
+        fwrite(network->layers[i].biases, sizeof(double), network->layers[i].nodes, fp);
     }
     fclose(fp);
     return 0;
@@ -71,20 +65,14 @@ int load_network(LayerDenseNetwork *network, const char *filename)
         return 1;
     }
     size_t num_layers;
-    fscanf(fp, "%zu", &num_layers);
+    fread(&num_layers, sizeof(size_t), 1, fp);
     for (size_t i = 0; i < num_layers; i++)
     {
         size_t nodes;
-        fscanf(fp, "%zu", &nodes);
+        fread(&nodes, sizeof(size_t), 1, fp);
         add_layer(network, nodes);
-        for (size_t j = 0; j < nodes; j++)
-        {
-            fscanf(fp, "%f", &network->layers[i].weights[j]);
-        }
-        for (size_t j = 0; j < nodes; j++)
-        {
-            fscanf(fp, "%f", &network->layers[i].biases[j]);
-        }
+        fread(network->layers[i].weights, sizeof(double), nodes, fp);
+        fread(network->layers[i].biases, sizeof(double), nodes, fp);
     }
     fclose(fp);
     return 0;
