@@ -1,0 +1,6 @@
+#ifndef BLUESKY_LEARN_LIBRARY_H
+#define BLUESKY_LEARN_LIBRARY_H
+
+void hello(void);
+
+#endif //BLUESKY_LEARN_LIBRARY_H
