@@ -1,0 +1,10 @@
+//
+// Created by mas on 9/22/22.
+//
+
+#ifndef BSLEARN_TESTS_CONSTANTS_H
+#define BSLEARN_TESTS_CONSTANTS_H
+
+#define LAYERDENSE_DEF_LAYERS 10
+
+#endif //BSLEARN_TESTS_CONSTANTS_H

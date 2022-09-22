@@ -5,8 +5,99 @@
 #include "main.h"
 #include "bslearn.h"
 
+#define RED   "\x1B[31m"
+#define GREEN "\x1B[32m"
+#define RESET "\x1B[0m"
+
+#define CHECK_ERROR(x, msg) if (x != 0) { printf("\t%s[FAIL] %s%s\n", RED, msg, RESET); return 1; }
+
+int test_add_layer()
+{
+    int success = 0;
+    LayerDenseNetwork network = {0};
+    for (int i = 0; i < 4; i++)
+    {
+        CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
+    }
+    for (size_t i = 0; i < network.num_layers; i++)
+    {
+        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        {
+            if (network.layers[i].weights[j] != 0.0)
+            {
+                printf("Error: %f", network.layers[i].weights[j]);
+                success = 1;
+                break;
+            }
+        }
+        if (success == 1)
+        {
+            break;
+        }
+    }
+    return 0;
+}
+
+int test_save_load_network()
+{
+    LayerDenseNetwork network = {0};
+    for (int i = 0; i < 4; i++)
+    {
+        CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
+    }
+    CHECK_ERROR(save_network(&network, "test_save_load_network"), "Failed to save network")
+    LayerDenseNetwork network2 = {0};
+    CHECK_ERROR(load_network(&network2, "test_save_load_network"), "Failed to load network")
+    for (size_t i = 0; i < network.num_layers; i++)
+    {
+        if (network.layers[i].nodes != network2.layers[i].nodes)
+        {
+            CHECK_ERROR(network.layers[i].nodes != network2.layers[i].nodes, "Number of nodes does not match.")
+        }
+        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        {
+            if (network.layers[i].weights[j] != network2.layers[i].weights[j])
+            {
+                CHECK_ERROR(network.layers[i].weights[j] != network2.layers[i].weights[j], "Weights mismatch.")
+            }
+        }
+        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        {
+            if (network.layers[i].biases[j] != network2.layers[i].biases[j])
+            {
+                CHECK_ERROR(network.layers[i].biases[j] != network2.layers[i].biases[j], "Biases mismatch.")
+            }
+        }
+    }
+    CHECK_ERROR(free_network(&network), "Failed to free network")
+    CHECK_ERROR(free_network(&network2), "Failed to free network")
+    CHECK_ERROR(remove("test_save_load_network"), "Failed to remove file")
+    return 0;
+}
+
+int run_test(int (*test)(), const char *name)
+{
+    printf("[TEST] %s...\n", name);
+    int result = test();
+    if (result == 0)
+    {
+        printf("\t%s[OKAY]%s\n", GREEN, RESET);
+    }
+    return result;
+}
+
 int main(void)
 {
-    hello();
-    return 0;
+    int (*tests[]) () = {test_add_layer, test_save_load_network};
+    const char *names[] = {"test_add_layer", "test_save_load_network"};
+
+    int result = 0;
+    for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
+    {
+        result += run_test(tests[i], names[i]);
+    }
+    char *color = result == 0 ? GREEN : RED;
+    printf("%s[%d TESTS FAILED]%s\n", color, result, RESET);
+
+    return result;
 }
