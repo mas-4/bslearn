@@ -43,7 +43,6 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes)
         log_error("add_layer: Network not initialized, no first input layer");
         return 1;
     }
-    network->num_layers++;
     if (network->num_layers >= network->cap_layers)
     {
         network->layers = realloc(network->layers, sizeof(Layer) * network->cap_layers * 2);
@@ -56,6 +55,7 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes)
     network->layers[network->num_layers].biases = malloc(sizeof(double) * n_nodes * prev_nodes);
     get_rng(network->layers[network->num_layers].weights, n_nodes * prev_nodes);
     get_rng(network->layers[network->num_layers].biases, n_nodes * prev_nodes);
+    network->num_layers++;
     return 0;
 }
 
