@@ -24,6 +24,7 @@ typedef struct {
     double *weights;
     double *biases;
     size_t nodes;
+    size_t prev_nodes;
 } Layer;
 
 typedef struct {
@@ -32,6 +33,7 @@ typedef struct {
     size_t cap_layers;
 } LayerDenseNetwork;
 
+int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes);
 int add_layer(LayerDenseNetwork *network, size_t n_nodes);
 int load_network(LayerDenseNetwork *network, const char *filename);
 int save_network(LayerDenseNetwork *network, const char *filename);

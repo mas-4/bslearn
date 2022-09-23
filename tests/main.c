@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "main.h"
 #include "bslearn.h"
+#include "logger.h"
 
 #define RED   "\x1B[31m"
 #define GREEN "\x1B[32m"
@@ -15,6 +16,7 @@ int test_add_layer()
 {
     int success = 0;
     LayerDenseNetwork network = {0};
+    CHECK_ERROR(init_network(&network, 4, 5), "Failed to initialize network");
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -25,7 +27,6 @@ int test_add_layer()
         {
             if (network.layers[i].weights[j] != 0.0)
             {
-                printf("Error: %f", network.layers[i].weights[j]);
                 success = 1;
                 break;
             }
@@ -35,12 +36,14 @@ int test_add_layer()
             break;
         }
     }
+    CHECK_ERROR(free_network(&network), "Failed to free network");
     return 0;
 }
 
 int test_save_load_network()
 {
     LayerDenseNetwork network = {0};
+    CHECK_ERROR(init_network(&network, 4, 5), "Failed to initialize network");
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -88,6 +91,7 @@ int run_test(int (*test)(), const char *name)
 
 int main(void)
 {
+    set_logging_level(BS_LOG_LEVEL_DEBUG);
     int (*tests[]) () = {test_add_layer, test_save_load_network};
     const char *names[] = {"test_add_layer", "test_save_load_network"};
 

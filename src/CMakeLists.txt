@@ -5,7 +5,7 @@ set(CMAKE_C_STANDARD 17)
 set(C_SRCS
         bslearn.c
         layerdense.c
-        common.c)
+        common.c logger.h)
 set(BS_INCLUDE
         ${CMAKE_SOURCE_DIR}/include)
 
@@ -19,3 +19,5 @@ add_library(bluesky_learn ${C_SRCS})
 target_include_directories(bluesky_learn PRIVATE ${MKL_INCLUDE})
 target_include_directories(bluesky_learn PRIVATE ${BS_INCLUDE})
 target_link_libraries(bluesky_learn PRIVATE MKL::MKL)
+# link math
+target_link_libraries(bluesky_learn PRIVATE m)
