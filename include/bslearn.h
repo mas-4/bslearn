@@ -35,5 +35,19 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes);
 int load_network(LayerDenseNetwork *network, const char *filename);
 int save_network(LayerDenseNetwork *network, const char *filename);
 int free_network(LayerDenseNetwork *network);
+int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs, double (*activate)(double));
+
+// sigmoid
+double sigmoid(double d);
+double sigmoid_prime(double d);
+// relu
+double relu(double d);
+double relu_prime(double d);
+// leaky relu
+double leaky_relu(double d);
+double leaky_relu_prime(double d);
+// tanh
+double tanh(double d);
+double tanh_prime(double d);
 
 #endif //BLUESKY_LEARN_LIBRARY_H
