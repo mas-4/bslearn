@@ -21,12 +21,16 @@ int alloc_layers(LayerDenseNetwork *network)
         }
         network->cap_layers = LAYERDENSE_DEF_LAYERS;
     }
+    return 0;
 
 }
 
 int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes)
 {
-    alloc_layers(network);
+    if (alloc_layers(network) != 0)
+    {
+        return 1;
+    }
     network->num_layers = 1;
     network->layers[0].nodes = n_nodes;
     network->layers[0].prev_nodes = n_inputs;
