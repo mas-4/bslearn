@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: CMake Configure
-        run: cmake -B build --config ${{ env.CONFIGURATION }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
 
       - name: CMake build
         run: cmake --build build
@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: CMake Configure
-        run: cmake -B build --config ${{ env.CONFIGURATION }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
 
       - name: CMake build
         run: cmake --build build
@@ -54,7 +54,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: CMake Configure
-        run: cmake -B build --config ${{ env.CONFIGURATION }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
 
       - name: CMake build
         run: cmake --build build
@@ -71,15 +71,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: CMake Configure
-        run: cmake -B build --config ${{ env.CONFIGURATION }}
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
 
       - name: CMake build
-        run: cmake --build build
+        run: cmake --build build --config ${{ env.CONFIGURATION }}
 
       - name: Test
         run: |
-          dir
           dir build
           dir build\${{ env.CONFIGURATION }}
-          cd build\${{ env.CONFIGURATION }}
-          .\test.exe
+          .\build\${{ env.CONFIGURATION }}\test.exe
