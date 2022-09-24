@@ -71,7 +71,7 @@ int save_network(LayerDenseNetwork *network, const char *filename)
         log_error("save_network: Invalid arguments");
         return 1;
     }
-    FILE *fp = fopen(filename, "w");
+    FILE *fp = fopen(filename, "wb");
     if (fp == NULL)
     {
         log_error("save_network: Failed to open file");
@@ -98,7 +98,7 @@ int load_network(LayerDenseNetwork *network, const char *filename)
         log_error("load_network: Invalid arguments");
         return 1;
     }
-    FILE *fp = fopen(filename, "r");
+    FILE *fp = fopen(filename, "rb");
     if (fp == NULL)
     {
         log_error("load_network: Failed to open file");
