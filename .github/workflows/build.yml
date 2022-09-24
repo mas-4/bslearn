@@ -78,4 +78,5 @@ jobs:
 
       - name: Test
         run: |
-          .\build\${{ env.CONFIGURATION }}\test.exe
+          cd build\${{ env.CONFIGURATION }}
+          .\test.exe
