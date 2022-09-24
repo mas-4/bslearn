@@ -2,7 +2,8 @@
 // Created by mas on 9/22/22.
 //
 #include <stddef.h>
-#include <malloc.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "bslearn.h"
 #include "constants.h"
 #include "common.h"
