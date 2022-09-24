@@ -111,7 +111,7 @@ int main(void)
 {
     set_logging_level(BS_LOG_LEVEL_DEBUG);
     int (*tests[]) () = {test_add_layer, test_save_load_network, test_evaluate_errors};
-    const char *names[] = {"test_add_layer", "test_save_load_network", "test_evaluate_errors"};t
+    const char *names[] = {"test_add_layer", "test_save_load_network", "test_evaluate_errors"};
 
     int result = 0;
     for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
