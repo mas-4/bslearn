@@ -43,8 +43,25 @@ jobs:
       - name: test
         run: ./build/test
 
-  msvc:
+  mac:
     runs-on: macos-latest
+    env:
+      CC: clang
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
+
+      - name: CMake Configure
+        run: cmake -B build
+
+      - name: CMake build
+        run: cmake --build build
+
+      - name: test
+        run: ./build/test
+
+  msvc:
+    runs-on: windows-latest
     env:
       CC: msvc
     steps:
