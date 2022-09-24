@@ -71,12 +71,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: CMake Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
+        run: cmake -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
 
       - name: CMake build
         run: cmake --build build
 
       - name: Test
         run: |
-          cd build\${{ env.CONFIGURATION }}
+          dir
+          cd ${{ env.CONFIGURATION }}
           .\test.exe
