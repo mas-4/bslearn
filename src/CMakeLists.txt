@@ -8,23 +8,24 @@ set(C_SRCS
 set(BS_INCLUDE
         ${CMAKE_SOURCE_DIR}/include)
 
-set(BUILD_SHARED_LIBS OFF)
-
-set(MKL_LINK static)
-if (DEFINED ENV{MKLROOT})
-    set(MKL_DIR $ENV{MKLROOT}/lib/cmake/mkl/)
-    message(STATUS "MKLROOT is set to ${MKL_DIR}")
-else()
-    set(MKL_DIR /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
-endif ()
-
-find_package(MKL CONFIG REQUIRED)
-
 add_library(bluesky_learn ${C_SRCS})
 
-target_include_directories(bluesky_learn PRIVATE ${MKL_H})
+
 target_include_directories(bluesky_learn PRIVATE ${BS_INCLUDE})
 
-target_link_libraries(bluesky_learn PRIVATE MKL::MKL)
 
-configure_file(${OMP_LIBRARY} ${CMAKE_BINARY_DIR} COPYONLY)
+# Configure MKL library, but not yet
+set(BUILD_SHARED_LIBS OFF)
+    if (DEFINED USE_MKL)
+    set(MKL_LINK static)
+    if (DEFINED ENV{MKLROOT})
+        set(MKL_DIR $ENV{MKLROOT}/lib/cmake/mkl/)
+        message(STATUS "MKLROOT is set to ${MKL_DIR}")
+    else()
+        set(MKL_DIR /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
+    endif ()
+    find_package(MKL CONFIG REQUIRED)
+    target_include_directories(bluesky_learn PRIVATE ${MKL_H})
+    target_link_libraries(bluesky_learn PRIVATE MKL::MKL)
+    configure_file(${OMP_LIBRARY} ${CMAKE_BINARY_DIR} COPYONLY)
+endif()

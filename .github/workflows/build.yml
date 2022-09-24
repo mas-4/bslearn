@@ -13,29 +13,9 @@ jobs:
     env:
       CC: gcc
     steps:
-      - name: Intel Apt repository
-        timeout-minutes: 1
-        run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt-get update
-
-      - name: Install Intel oneAPI
-        timeout-minutes: 5
-        # run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
-        run: sudo apt-get install intel-oneapi-mkl ninja-build
 
       - name: checkout project code
         uses: actions/checkout@v2
-
-      - name: Setup Intel oneAPI environment
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          printenv >> $GITHUB_ENV
-          ls /opt/intel/oneapi/mkl/2022.2.0/
-          tree /opt/intel/oneapi/mkl/2022.2.0/
 
       - name: CMake Configure
         run: cmake -B build
@@ -51,27 +31,25 @@ jobs:
     env:
       CC: clang
     steps:
-      - name: Intel Apt repository
-        timeout-minutes: 1
-        run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
-          sudo apt-get update
-
-      - name: Install Intel oneAPI
-        timeout-minutes: 5
-        # run: sudo apt-get install intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl ninja-build
-        run: sudo apt-get install intel-oneapi-mkl ninja-build clang
-
       - name: checkout project code
         uses: actions/checkout@v2
 
-      - name: Setup Intel oneAPI environment
-        run: |
-          source /opt/intel/oneapi/setvars.sh
-          printenv >> $GITHUB_ENV
+      - name: CMake Configure
+        run: cmake -B build
+
+      - name: CMake build
+        run: cmake --build build
+
+      - name: test
+        run: ./build/test
+
+  msvc:
+    runs-on: macos-latest
+    env:
+      CC: msvc
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
 
       - name: CMake Configure
         run: cmake -B build

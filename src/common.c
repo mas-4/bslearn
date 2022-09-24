@@ -2,12 +2,18 @@
 // Created by mas on 9/22/22.
 //
 
+#ifdef USE_MKL
 #include <mkl.h>
+#else
+#include <stdlib.h>
+#endif
+
 #include "common.h"
 #include "constants.h"
 #define BS_LOGGER_H_IMPL
 #include "logger.h"
 
+#ifdef USE_MKL
 int get_rng(double *arr, size_t n)
 {
     VSLStreamStatePtr stream;
@@ -27,6 +33,20 @@ int get_rng(double *arr, size_t n)
     vslDeleteStream(&stream);
     return 0;
 }
+#else // USE_MKL
+int get_rng(double *arr, size_t n)
+{
+    double min = 0.0;
+    double max = 1.0;
+    double range = max - min;
+    double div = RAND_MAX / range;
+    for (size_t i = 0; i < n; i++)
+    {
+        arr[i] = min + (rand() / div);
+    }
+    return 0;
+}
+#endif
 
 double sigmoid_prime(double d)
 {
