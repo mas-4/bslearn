@@ -12,14 +12,14 @@ set(BS_INCLUDE
 set(BUILD_SHARED_LIBS OFF)
 
 set(MKL_LINK static)
-set(MKL_DIR /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
-find_package(MKL CONFIG REQUIRED)
+if (DEFINED ENV{MKLROOT})
+    set(MKL_DIR $ENV{MKLROOT}/lib/cmake/mkl/)
+    message(STATUS "MKLROOT is set to ${MKL_DIR}")
+else()
+    set(MKL_DIR /opt/intel/oneapi/mkl/latest/lib/cmake/mkl/)
+endif ()
 
-get_cmake_property(_variableNames VARIABLES)
-list (SORT _variableNames)
-foreach (_variableName ${_variableNames})
-    message(STATUS "${_variableName}=${${_variableName}}")
-endforeach()
+find_package(MKL CONFIG REQUIRED)
 
 add_library(bluesky_learn ${C_SRCS})
 
