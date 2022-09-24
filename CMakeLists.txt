@@ -10,4 +10,5 @@ set(TEST_SRCS
 
 add_executable(test ${TEST_SRCS})
 target_include_directories(test PUBLIC include)
+
 target_link_libraries(test bluesky_learn)
