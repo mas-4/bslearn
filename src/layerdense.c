@@ -152,6 +152,7 @@ int feed_forward(Layer *layer, double *inputs, double *outputs, double (*activat
         return 1;
     }
     matmul_activate(layer->weights, inputs, outputs, layer->nodes, layer->prev_nodes, 1, activate, outputs);
+    return 0;
 }
 
 int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs, double (*activate)(double))
