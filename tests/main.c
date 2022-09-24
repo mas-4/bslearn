@@ -67,6 +67,10 @@ int test_save_load_network()
         {
             if (network.layers[i].biases[j] != network2.layers[i].biases[j])
             {
+                if (network.layers[i].biases[j] != network2.layers[i].biases[j])
+                {
+                    printf("%f %f", network.layers[i].biases[j], network2.layers[i].biases[j]);
+                }
                 CHECK_ERROR(network.layers[i].biases[j] != network2.layers[i].biases[j], "Biases mismatch.")
             }
         }
