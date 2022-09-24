@@ -3,7 +3,6 @@ project(bluesky_learn C)
 set(CMAKE_C_STANDARD 17)
 
 set(C_SRCS
-        bslearn.c
         layerdense.c
         common.c)
 set(BS_INCLUDE

@@ -13,9 +13,6 @@
 #define BLUESKY_LEARN_LIBRARY_VERSION_PATCH 1
 
 
-void hello(void);
-
-
 /******************************************************
  * Layer Dense Neural Networks
  ******************************************************/

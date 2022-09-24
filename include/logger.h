@@ -13,12 +13,12 @@ enum LoggingLevel {
     BS_LOG_LEVEL_FATAL,
 };
 
-__attribute__((unused)) void set_logging_level(enum LoggingLevel l);
-__attribute__((unused)) void log_fatal(const char *msg);
-__attribute__((unused)) void log_error(const char *msg);
-__attribute__((unused)) void log_warn(const char *msg);
-__attribute__((unused)) void log_info(const char *msg);
-__attribute__((unused)) void log_debug(const char *msg);
+void set_logging_level(enum LoggingLevel l);
+void log_fatal(const char *msg);
+void log_error(const char *msg);
+void log_warn(const char *msg);
+void log_info(const char *msg);
+void log_debug(const char *msg);
 
 #endif //BS_LOGGER_H
 
@@ -35,12 +35,12 @@ __attribute__((unused)) void log_debug(const char *msg);
 
 enum LoggingLevel level = BS_LOG_LEVEL_INFO;
 
-__attribute__((unused)) void set_logging_level(enum LoggingLevel l) {
+void set_logging_level(enum LoggingLevel l) {
     level = l;
 }
 
 
-__attribute__((unused)) void log_debug(const char *msg)
+void log_debug(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_DEBUG)
     {
@@ -48,7 +48,7 @@ __attribute__((unused)) void log_debug(const char *msg)
     }
 }
 
-__attribute__((unused)) void log_info(const char *msg)
+void log_info(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_INFO)
     {
@@ -56,7 +56,7 @@ __attribute__((unused)) void log_info(const char *msg)
     }
 }
 
-__attribute__((unused)) void log_warn(const char *msg)
+void log_warn(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_WARN)
     {
@@ -64,7 +64,7 @@ __attribute__((unused)) void log_warn(const char *msg)
     }
 }
 
-__attribute__((unused)) void log_error(const char *msg)
+void log_error(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_ERROR)
     {
@@ -72,7 +72,7 @@ __attribute__((unused)) void log_error(const char *msg)
     }
 }
 
-__attribute__((unused)) void log_fatal(const char *msg)
+void log_fatal(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_FATAL)
     {

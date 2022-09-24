@@ -5,6 +5,7 @@
 #include <mkl.h>
 #include "common.h"
 #include "constants.h"
+#define BS_LOGGER_H_IMPL
 #include "logger.h"
 
 int get_rng(double *arr, size_t n)

@@ -34,7 +34,8 @@ jobs:
         run: |
           source /opt/intel/oneapi/setvars.sh
           printenv >> $GITHUB_ENV
-          ls /opt/intel/oneapi/mkl/2022.2.0/lib/cmake/mkl/
+          ls /opt/intel/oneapi/mkl/2022.2.0/
+          tree /opt/intel/oneapi/mkl/2022.2.0/
 
       - name: CMake Configure
         run: cmake -B build
