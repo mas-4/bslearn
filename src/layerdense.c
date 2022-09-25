@@ -103,17 +103,23 @@ int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes, ch
     {
         return 1;
     }
-    network->loaded = 0;
+    network->loaded = 0; // if loaded from saved file, must free loss/activation
+    // set activation function
     network->activation = activation;
     network->activation_func = get_activation_func(activation);
     network->activation_func_prime = get_activation_function_prime(activation);
+    // set loss function
     network->loss = loss;
     network->loss_func = get_loss_func(loss);
     network->num_layers = 1;
+
+    // Allocate memory for the first layer
     network->layers[0].nodes = n_nodes;
     network->layers[0].prev_nodes = n_inputs;
     network->layers[0].weights = malloc(sizeof(double) * n_inputs * n_nodes);
     network->layers[0].biases = malloc(sizeof(double) * n_nodes);
+    network->layers[0].output = malloc(sizeof(double) * n_nodes);
+
     get_rng(network->layers[0].weights, n_inputs * n_nodes);
     get_rng(network->layers[0].biases, n_nodes);
     return 0;
@@ -136,6 +142,7 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes)
     network->layers[network->num_layers].prev_nodes = prev_nodes;
     network->layers[network->num_layers].weights = malloc(sizeof(double) * n_nodes * prev_nodes);
     network->layers[network->num_layers].biases = malloc(sizeof(double) * n_nodes);
+    network->layers[network->num_layers].output = malloc(sizeof(double) * n_nodes);
     get_rng(network->layers[network->num_layers].weights, n_nodes * prev_nodes);
     get_rng(network->layers[network->num_layers].biases, n_nodes);
     network->num_layers++;
@@ -208,6 +215,7 @@ int load_network(LayerDenseNetwork *network, const char *filename)
         network->layers[i].biases = malloc(sizeof(double) * nodes);
         fread(network->layers[i].weights, sizeof(double), nodes * prev_nodes, fp);
         fread(network->layers[i].biases, sizeof(double), nodes, fp);
+        network->layers[i].output = malloc(sizeof(double) * nodes);
     }
     size_t activation_len;
     fread(&activation_len, sizeof(size_t), 1, fp);
@@ -236,6 +244,7 @@ int free_network(LayerDenseNetwork *network)
     {
         free(network->layers[i].weights);
         free(network->layers[i].biases);
+        free(network->layers[i].output);
     }
     free(network->layers);
     // free activation and loss if allocated
@@ -265,11 +274,14 @@ int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs)
         log_error("evaluate: Invalid arguments");
         return 1;
     }
-    double *prev_outputs = inputs;
-    for (size_t i = 0; i < network->num_layers; i++)
+    // first layer
+    feed_forward(&network->layers[0], inputs, network->layers[0].output, network->activation_func);
+    for (size_t i = 1; i < network->num_layers; i++)
     {
-        feed_forward(&network->layers[i], prev_outputs, outputs, network->activation_func);
-        prev_outputs = outputs;
+        feed_forward(&network->layers[i],
+                     network->layers[i-1].output, // previous layer's output
+                     network->layers[i].output, // current layer's output
+                     network->activation_func);
     }
     return 0;
 }

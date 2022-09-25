@@ -21,6 +21,7 @@
 typedef struct {
     double *weights;
     double *biases;
+    double *output;
     size_t nodes;
     size_t prev_nodes;
 } Layer;
