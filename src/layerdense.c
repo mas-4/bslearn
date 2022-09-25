@@ -103,6 +103,7 @@ int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes, ch
     {
         return 1;
     }
+    network->loaded = 0;
     network->activation = activation;
     network->activation_func = get_activation_func(activation);
     network->activation_func_prime = get_activation_function_prime(activation);
@@ -182,6 +183,7 @@ int load_network(LayerDenseNetwork *network, const char *filename)
         log_error("load_network: Invalid arguments");
         return 1;
     }
+    network->loaded = 1;
     FILE *fp = fopen(filename, "rb");
     if (fp == NULL)
     {
@@ -236,6 +238,12 @@ int free_network(LayerDenseNetwork *network)
         free(network->layers[i].biases);
     }
     free(network->layers);
+    // free activation and loss if allocated
+    if (network->loaded == 1)
+    {
+        free(network->activation);
+        free(network->loss);
+    }
     return 0;
 }
 

@@ -34,6 +34,7 @@ typedef struct {
     double (*activation_func)(double);
     double (*activation_func_prime)(double);
     double (*loss_func)(double*, double*, size_t);
+    int loaded;
 } LayerDenseNetwork;
 
 int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes, char *activation, char *loss);
