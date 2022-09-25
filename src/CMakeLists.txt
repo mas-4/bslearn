@@ -1,7 +1,7 @@
 project(bluesky_learn C)
 
 set(CMAKE_C_STANDARD 17)
-
+set(_CRT_SECURE_NO_WARNINGS 1)
 set(C_SRCS
         layerdense.c
         common.c)
