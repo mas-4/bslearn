@@ -50,44 +50,79 @@ int get_rng(double *arr, size_t n)
 // </editor-fold>
 
 // <editor-fold desc="matmuls">
-int matmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, size_t b_cols, double *out)
+int matmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output)
 {
+#ifdef USE_MKL
+    cblas_dgemm(
+            CblasRowMajor,
+            CblasNoTrans,
+            CblasNoTrans,
+            (int)a_rows,
+            (int)a_cols,
+            (int)a_cols,
+            1.0,
+            a,
+            (int)a_cols,
+            b,
+            (int)a_cols,
+            0.0,
+            output,
+            (int)a_cols
+    );
+#else // USE_MKL
     for (size_t i = 0; i < a_rows; i++)
     {
-        for (size_t j = 0; j < b_cols; j++)
+        double sum = 0.0;
+        for (size_t j = 0; j < a_cols; j++)
         {
-            double sum = 0.0;
-            for (size_t k = 0; k < a_cols; k++)
-            {
-                sum += a[i * a_cols + k] * b[k * b_cols + j];
-            }
-            out[i * b_cols + j] = sum + c[j];
+            sum += a[i * a_cols + j] * b[j];
         }
+        output[i] = sum + c[i];
     }
+#endif // USE_MKL
     return 0;
-
 }
 
+// a: matrix
+// b: vector
+// c: vector
 int matmul_activate(
         const double *a, const double *b, const double *c,
-        size_t a_rows, size_t a_cols, size_t b_cols,
+        size_t a_rows, size_t a_cols,
         double (*activate)(double), double *out
 )
 {
+#ifdef USE_MKL
+    cblas_dgemv(
+            CblasRowMajor,
+            CblasNoTrans,
+            (int)a_rows,
+            (int)a_cols,
+            1.0,
+            a,
+            (int)a_cols,
+            b,
+            1,
+            0.0,
+            out,
+            1
+    );
     for (size_t i = 0; i < a_rows; i++)
     {
-        for (size_t j = 0; j < b_cols; j++)
+        out[i] = activate(out[i] + c[i]);
+    }
+#else // USE_MKL
+    for (size_t i = 0; i < a_rows; i++)
+    {
+        double sum = 0.0;
+        for (size_t j = 0; j < a_cols; j++)
         {
-            double sum = 0.0;
-            for (size_t k = 0; k < a_cols; k++)
-            {
-                sum += a[i * a_cols + k] * b[k * b_cols + j];
-            }
-            out[i * b_cols + j] = activate(sum + c[j]);
+            sum += a[i * a_cols + j] * b[j];
         }
+        out[i] = activate(sum + c[i]);
     }
     return 0;
-
+#endif // USE_MKL
 }
 // </editor-fold>
 
@@ -162,5 +197,20 @@ double binary_crossentropy(const double *y, const double *y_hat, size_t n)
         sum += y[i] * log(y_hat[i]);
     }
     return -sum / (double)n;
+}
+// </editor-fold>
+
+// <editor-fold desc="miscellaneous">
+int print_matrix(const double *arr, size_t rows, size_t cols)
+{
+    for (size_t i = 0; i < rows; i++)
+    {
+        for (size_t j = 0; j < cols; j++)
+        {
+            printf("%0.5f ", arr[i * cols + j]);
+        }
+        printf("\n");
+    }
+    return 0;
 }
 // </editor-fold>

@@ -254,7 +254,7 @@ int feed_forward(Layer *layer, double *inputs, double *outputs, double (*activat
         log_error("feed_forward: Invalid arguments");
         return 1;
     }
-    matmul_activate(layer->weights, inputs, outputs, layer->nodes, layer->prev_nodes, 1, activate, outputs);
+    matmul_activate(layer->weights, inputs, layer->biases, layer->nodes, layer->prev_nodes, activate, outputs);
     return 0;
 }
 

@@ -115,24 +115,19 @@ int test_matmul()
 {
     size_t a_rows = 3;
     size_t a_cols = 3;
-    size_t b_cols = 3;
-    double a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-    double b[] = {1, 0, 0,
+    double a[] = {1, 0, 0,
                   0, 1, 0,
-                  0, 0, 1,};
+                  0, 0, 1};
+    double b[] = {0, 1, 2};
     double c[] = {0, 1, 2};
-    double output[9] = {0};
-    double answer[9] = {0, 0, 0, 1, 5, 1, 2, 2, 10};
-    CHECK_ERROR(matmul(a, b, c, a_rows, a_cols, b_cols, output), "Failed to multiply matrices")
-    for (size_t i = 0; i < 9; i++)
+    double output[3] = {0};
+    double answer[3] = {0, 2, 4};
+    CHECK_ERROR(matmul(a, b, c, a_rows, a_cols, output), "Failed to multiply matrices")
+    for (size_t i = 0; i < 3; i++)
     {
         if (output[i] != answer[i])
         {
-            if (output[i] != answer[i])
-            {
-                printf("%f %f\n", output[i], answer[i]);
-                CHECK_ERROR(output[i] != answer[i], "Answer is wrong.")
-            }
+            CHECK_ERROR(output[i] != answer[i], "Matmul failed")
         }
     }
     return 0;
