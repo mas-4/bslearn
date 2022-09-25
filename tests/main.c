@@ -5,6 +5,7 @@
 #include <string.h>
 #include "bslearn.h"
 #include "logger.h"
+#include "common.h"
 
 #define RED   "\x1B[31m"
 #define GREEN "\x1B[32m"
@@ -110,11 +111,38 @@ int run_test(int (*test)(), const char *name)
     return result;
 }
 
+int test_matmul()
+{
+    size_t a_rows = 3;
+    size_t a_cols = 3;
+    size_t b_cols = 3;
+    double a[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    double b[] = {1, 0, 0,
+                  0, 1, 0,
+                  0, 0, 1,};
+    double c[] = {0, 1, 2};
+    double output[9] = {0};
+    double answer[9] = {0, 0, 0, 1, 5, 1, 2, 2, 10};
+    CHECK_ERROR(matmul(a, b, c, a_rows, a_cols, b_cols, output), "Failed to multiply matrices")
+    for (size_t i = 0; i < 9; i++)
+    {
+        if (output[i] != answer[i])
+        {
+            if (output[i] != answer[i])
+            {
+                printf("%f %f\n", output[i], answer[i]);
+                CHECK_ERROR(output[i] != answer[i], "Answer is wrong.")
+            }
+        }
+    }
+    return 0;
+}
+
 int main(void)
 {
     set_logging_level(BS_LOG_LEVEL_DEBUG);
-    int (*tests[]) () = {test_add_layer, test_save_load_network, test_evaluate_errors};
-    const char *names[] = {"test_add_layer", "test_save_load_network", "test_evaluate_errors"};
+    int (*tests[]) () = {test_add_layer, test_save_load_network, test_matmul, test_evaluate_errors};
+    const char *names[] = {"test_add_layer", "test_save_load_network", "test_matmul", "test_evaluate_errors"};
 
     int result = 0;
     for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)
