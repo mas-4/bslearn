@@ -131,3 +131,36 @@ double tanh_prime(double d)
     return 1 - pow(tanh(d), 2);
 }
 // </editor-fold>
+
+
+// <editor-fold desc="losses">
+double mse(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += pow(y[i] - y_hat[i], 2);
+    }
+    return sum / (double)n;
+}
+
+double mae(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += fabs(y[i] - y_hat[i]);
+    }
+    return sum / (double)n;
+}
+
+double binary_crossentropy(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += y[i] * log(y_hat[i]);
+    }
+    return -sum / (double)n;
+}
+// </editor-fold>

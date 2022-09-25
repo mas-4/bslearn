@@ -2,6 +2,7 @@
 // Created by mas on 9/22/22.
 //
 #include <stdio.h>
+#include <string.h>
 #include "bslearn.h"
 #include "logger.h"
 
@@ -9,13 +10,13 @@
 #define GREEN "\x1B[32m"
 #define RESET "\x1B[0m"
 
-#define CHECK_ERROR(x, msg) if (x != 0) { printf("\t%s[FAIL] %s%s\n", RED, msg, RESET); return 1; }
+#define CHECK_ERROR(x, msg) if (x != 0) { printf("\t%s[FAIL] %s%s %d\n", RED, msg, RESET, x); return x; }
 
 int test_add_layer()
 {
     int success = 0;
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5), "Failed to initialize network");
+    CHECK_ERROR(init_network(&network, 4, 5, "relu", "mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -35,14 +36,14 @@ int test_add_layer()
             break;
         }
     }
-    CHECK_ERROR(free_network(&network), "Failed to free network");
+    CHECK_ERROR(free_network(&network), "Failed to free network")
     return 0;
 }
 
 int test_save_load_network()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5), "Failed to initialize network");
+    CHECK_ERROR(init_network(&network, 4, 5, "relu", "mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -50,6 +51,8 @@ int test_save_load_network()
     CHECK_ERROR(save_network(&network, "test_save_load_network"), "Failed to save network")
     LayerDenseNetwork network2 = {0};
     CHECK_ERROR(load_network(&network2, "test_save_load_network"), "Failed to load network")
+    CHECK_ERROR(strcmp(network.activation, network2.activation) != 0, "Activation functions do not match")
+    CHECK_ERROR(strcmp(network.loss, network2.loss) != 0, "Loss functions do not match")
     for (size_t i = 0; i < network.num_layers; i++)
     {
         if (network.layers[i].nodes != network2.layers[i].nodes)
@@ -84,14 +87,14 @@ int test_save_load_network()
 int test_evaluate_errors()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 10), "Failed to initialize network");
+    CHECK_ERROR(init_network(&network, 4, 10, "relu", "mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 100), "Failed to add layer to network")
     }
     double input[4] = {1, 2, 3, 4};
     double output[5] = {0};
-    CHECK_ERROR(evaluate(&network, input, output, relu), "Failed to evaluate network")
+    CHECK_ERROR(evaluate(&network, input, output), "Failed to evaluate network")
     CHECK_ERROR(free_network(&network), "Failed to free network")
     return 0;
 }

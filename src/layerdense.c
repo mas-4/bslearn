@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "bslearn.h"
 #include "constants.h"
 #include "common.h"
@@ -25,12 +26,88 @@ int alloc_layers(LayerDenseNetwork *network)
 
 }
 
-int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes)
+double (*get_activation_func(char *activation))(double)
+{
+    if (strcmp(activation, "sigmoid") == 0)
+    {
+        return sigmoid;
+    }
+    else if (strcmp(activation, "relu") == 0)
+    {
+        return relu;
+    }
+    else if (strcmp(activation, "leaky_relu") == 0)
+    {
+        return leaky_relu;
+    }
+    else if (strcmp(activation, "tanh") == 0)
+    {
+        return tanh;
+    }
+    else
+    {
+        log_error("get_activation_func: Unknown activation function");
+        return NULL;
+    }
+}
+
+double (*get_activation_function_prime(char *loss))(double)
+{
+    if (strcmp(loss, "sigmoid") == 0)
+    {
+        return sigmoid_prime;
+    }
+    else if (strcmp(loss, "relu") == 0)
+    {
+        return relu_prime;
+    }
+    else if (strcmp(loss, "leaky_relu") == 0)
+    {
+        return leaky_relu_prime;
+    }
+    else if (strcmp(loss, "tanh") == 0)
+    {
+        return tanh_prime;
+    }
+    else
+    {
+        log_error("get_activation_function_prime: Unknown activation function");
+        return NULL;
+    }
+}
+
+double (*get_loss_func(char *loss))(double *, double *, size_t)
+{
+    if (strcmp(loss, "mse") == 0)
+    {
+        return mse;
+    }
+    else if (strcmp(loss, "mae") == 0)
+    {
+        return mae;
+    }
+    else if (strcmp(loss, "binary_crossentropy") == 0)
+    {
+        return binary_crossentropy;
+    }
+    else
+    {
+        log_error("get_loss_func: Unknown loss function");
+        return NULL;
+    }
+}
+
+int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes, char *activation, char *loss)
 {
     if (alloc_layers(network) != 0)
     {
         return 1;
     }
+    network->activation = activation;
+    network->activation_func = get_activation_func(activation);
+    network->activation_func_prime = get_activation_function_prime(activation);
+    network->loss = loss;
+    network->loss_func = get_loss_func(loss);
     network->num_layers = 1;
     network->layers[0].nodes = n_nodes;
     network->layers[0].prev_nodes = n_inputs;
@@ -88,6 +165,12 @@ int save_network(LayerDenseNetwork *network, const char *filename)
         fwrite(network->layers[i].weights, sizeof(double), nodes * prev_nodes, fp);
         fwrite(network->layers[i].biases, sizeof(double), nodes, fp);
     }
+    size_t activation_len = strlen(network->activation);
+    fwrite(&activation_len, sizeof(size_t), 1, fp);
+    fwrite(network->activation, sizeof(char), activation_len, fp);
+    size_t loss_len = strlen(network->loss);
+    fwrite(&loss_len, sizeof(size_t), 1, fp);
+    fwrite(network->loss, sizeof(char), loss_len, fp);
     fclose(fp);
     return 0;
 }
@@ -124,6 +207,18 @@ int load_network(LayerDenseNetwork *network, const char *filename)
         fread(network->layers[i].weights, sizeof(double), nodes * prev_nodes, fp);
         fread(network->layers[i].biases, sizeof(double), nodes, fp);
     }
+    size_t activation_len;
+    fread(&activation_len, sizeof(size_t), 1, fp);
+    network->activation = malloc(sizeof(char) * (activation_len + 1));
+    fread(network->activation, sizeof(char), activation_len, fp);
+    network->activation[activation_len] = '\0';
+    network->activation_func = get_activation_func(network->activation);
+    network->activation_func_prime = get_activation_function_prime(network->activation);
+    size_t loss_len;
+    fread(&loss_len, sizeof(size_t), 1, fp);
+    network->loss = malloc(sizeof(char) * (loss_len + 1));
+    fread(network->loss, sizeof(char), loss_len, fp);
+    network->loss[loss_len] = '\0';
     fclose(fp);
     return 0;
 }
@@ -155,7 +250,7 @@ int feed_forward(Layer *layer, double *inputs, double *outputs, double (*activat
     return 0;
 }
 
-int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs, double (*activate)(double))
+int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs)
 {
     if (network == NULL || inputs == NULL || outputs == NULL)
     {
@@ -165,7 +260,7 @@ int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs, double
     double *prev_outputs = inputs;
     for (size_t i = 0; i < network->num_layers; i++)
     {
-        feed_forward(&network->layers[i], prev_outputs, outputs, activate);
+        feed_forward(&network->layers[i], prev_outputs, outputs, network->activation_func);
         prev_outputs = outputs;
     }
     return 0;
