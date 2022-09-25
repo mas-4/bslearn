@@ -50,7 +50,7 @@ int get_rng(double *arr, size_t n)
 // </editor-fold>
 
 // <editor-fold desc="matmuls">
-int matmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output)
+int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output)
 {
 #ifdef USE_MKL
     cblas_dgemm(
@@ -86,7 +86,7 @@ int matmul(const double *a, const double *b, const double *c, size_t a_rows, siz
 // a: matrix
 // b: vector
 // c: vector
-int matmul_activate(
+int matvecmul_activate(
         const double *a, const double *b, const double *c,
         size_t a_rows, size_t a_cols,
         double (*activate)(double), double *out

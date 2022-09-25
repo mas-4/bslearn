@@ -85,7 +85,29 @@ int test_save_load_network()
     return 0;
 }
 
-int test_evaluate_errors()
+int test_matmul()
+{
+    size_t a_rows = 3;
+    size_t a_cols = 3;
+    double a[] = {1, 0, 0,
+                  0, 1, 0,
+                  0, 0, 1};
+    double b[] = {0, 1, 2};
+    double c[] = {0, 1, 2};
+    double output[3] = {0};
+    double answer[3] = {0, 2, 4};
+    CHECK_ERROR(matvecmul(a, b, c, a_rows, a_cols, output), "Failed to multiply matrices")
+    for (size_t i = 0; i < 3; i++)
+    {
+        if (output[i] != answer[i])
+        {
+            CHECK_ERROR(output[i] != answer[i], "Matmul failed")
+        }
+    }
+    return 0;
+}
+
+int test_predict_errors()
 {
     LayerDenseNetwork network = {0};
     CHECK_ERROR(init_network(&network, 4, 10, "relu", "mse"), "Failed to initialize network")
@@ -94,8 +116,8 @@ int test_evaluate_errors()
         CHECK_ERROR(add_layer(&network, 100), "Failed to add layer to network")
     }
     double input[4] = {1, 2, 3, 4};
-    double output[5] = {0};
-    CHECK_ERROR(evaluate(&network, input, output), "Failed to evaluate network")
+    double output[100] = {0};
+    CHECK_ERROR(predict(&network, input, output), "Failed to predict network")
     CHECK_ERROR(free_network(&network), "Failed to free network")
     return 0;
 }
@@ -111,33 +133,11 @@ int run_test(int (*test)(), const char *name)
     return result;
 }
 
-int test_matmul()
-{
-    size_t a_rows = 3;
-    size_t a_cols = 3;
-    double a[] = {1, 0, 0,
-                  0, 1, 0,
-                  0, 0, 1};
-    double b[] = {0, 1, 2};
-    double c[] = {0, 1, 2};
-    double output[3] = {0};
-    double answer[3] = {0, 2, 4};
-    CHECK_ERROR(matmul(a, b, c, a_rows, a_cols, output), "Failed to multiply matrices")
-    for (size_t i = 0; i < 3; i++)
-    {
-        if (output[i] != answer[i])
-        {
-            CHECK_ERROR(output[i] != answer[i], "Matmul failed")
-        }
-    }
-    return 0;
-}
-
 int main(void)
 {
     set_logging_level(BS_LOG_LEVEL_DEBUG);
-    int (*tests[]) () = {test_add_layer, test_save_load_network, test_matmul, test_evaluate_errors};
-    const char *names[] = {"test_add_layer", "test_save_load_network", "test_matmul", "test_evaluate_errors"};
+    int (*tests[]) () = {test_add_layer, test_save_load_network, test_matmul, test_predict_errors};
+    const char *names[] = {"test_add_layer", "test_save_load_network", "test_matmul", "test_predict_errors"};
 
     int result = 0;
     for (int i = 0; i < sizeof(tests) / sizeof(tests[0]); i++)

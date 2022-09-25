@@ -142,7 +142,7 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes)
     network->layers[network->num_layers].prev_nodes = prev_nodes;
     network->layers[network->num_layers].weights = malloc(sizeof(double) * n_nodes * prev_nodes);
     network->layers[network->num_layers].biases = malloc(sizeof(double) * n_nodes);
-    network->layers[network->num_layers].output = malloc(sizeof(double) * n_nodes);
+    network->layers[network->num_layers].output = calloc(n_nodes, sizeof(double));
     get_rng(network->layers[network->num_layers].weights, n_nodes * prev_nodes);
     get_rng(network->layers[network->num_layers].biases, n_nodes);
     network->num_layers++;
@@ -263,15 +263,15 @@ int feed_forward(Layer *layer, double *inputs, double *outputs, double (*activat
         log_error("feed_forward: Invalid arguments");
         return 1;
     }
-    matmul_activate(layer->weights, inputs, layer->biases, layer->nodes, layer->prev_nodes, activate, outputs);
+    matvecmul_activate(layer->weights, inputs, layer->biases, layer->nodes, layer->prev_nodes, activate, outputs);
     return 0;
 }
 
-int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs)
+int predict(LayerDenseNetwork *network, double *inputs, double *outputs)
 {
     if (network == NULL || inputs == NULL || outputs == NULL)
     {
-        log_error("evaluate: Invalid arguments");
+        log_error("predict: Invalid arguments");
         return 1;
     }
     // first layer
@@ -283,5 +283,8 @@ int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs)
                      network->layers[i].output, // current layer's output
                      network->activation_func);
     }
+    memcpy(outputs,
+           network->layers[network->num_layers-1].output,
+           sizeof(double) * network->layers[network->num_layers-1].nodes);
     return 0;
 }

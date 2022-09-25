@@ -9,8 +9,8 @@
 int get_rng(double *arr, size_t n);
 
 // A * b + c
-int matmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output);
-int matmul_activate(
+int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output);
+int matvecmul_activate(
         const double *a, const double *b, const double *c,
         size_t a_rows, size_t a_cols,
         double (*activate)(double), double *out

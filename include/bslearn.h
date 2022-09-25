@@ -43,7 +43,7 @@ int add_layer(LayerDenseNetwork *network, size_t n_nodes);
 int load_network(LayerDenseNetwork *network, const char *filename);
 int save_network(LayerDenseNetwork *network, const char *filename);
 int free_network(LayerDenseNetwork *network);
-int evaluate(LayerDenseNetwork *network, double *inputs, double *outputs);
+int predict(LayerDenseNetwork *network, double *inputs, double *outputs);
 
 // sigmoid
 double sigmoid(double d);
