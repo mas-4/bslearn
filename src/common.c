@@ -127,41 +127,41 @@ int matvecmul_activate(
 // </editor-fold>
 
 // <editor-fold desc="activations">
-double sigmoid(double x)
+double bs_sigmoid(double d)
 {
-    return 1.0 / (1.0 + exp(-x));
+    return 1.0 / (1.0 + exp(-d));
 }
 
-double sigmoid_prime(double d)
+double bs_sigmoid_p(double d)
 {
     return 0;
 }
 
-double relu(double d)
+double bs_relu(double d)
 {
     return d > 0 ? d : 0;
 }
-double relu_prime(double d)
+double bs_relu_p(double d)
 {
     return d > 0 ? 1 : 0;
 }
 
-double leaky_relu(double d)
+double bs_leaky_relu(double d)
 {
     return d > 0 ? d : 0.01 * d;
 }
 
-double leaky_relu_prime(double d)
+double bs_leaky_relu_p(double d)
 {
     return d > 0 ? 1 : 0.01;
 }
 
-double tanh(double d)
+double bs_tanh(double d)
 {
     return (exp(d) - exp(-d)) / (exp(d) + exp(-d));
 }
 
-double tanh_prime(double d)
+double bs_tanh_p(double d)
 {
     return 1 - pow(tanh(d), 2);
 }
@@ -169,7 +169,7 @@ double tanh_prime(double d)
 
 
 // <editor-fold desc="losses">
-double mse(const double *y, const double *y_hat, size_t n)
+double bs_mse(const double *y, const double *y_hat, size_t n)
 {
     double sum = 0.0;
     for (size_t i = 0; i < n; i++)
@@ -179,7 +179,7 @@ double mse(const double *y, const double *y_hat, size_t n)
     return sum / (double)n;
 }
 
-double mae(const double *y, const double *y_hat, size_t n)
+double bs_mae(const double *y, const double *y_hat, size_t n)
 {
     double sum = 0.0;
     for (size_t i = 0; i < n; i++)
@@ -189,7 +189,7 @@ double mae(const double *y, const double *y_hat, size_t n)
     return sum / (double)n;
 }
 
-double binary_crossentropy(const double *y, const double *y_hat, size_t n)
+double bs_crossentropy(const double *y, const double *y_hat, size_t n)
 {
     double sum = 0.0;
     for (size_t i = 0; i < n; i++)

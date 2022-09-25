@@ -17,7 +17,7 @@ int test_add_layer()
 {
     int success = 0;
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5, "relu", "mse"), "Failed to initialize network")
+    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -44,7 +44,7 @@ int test_add_layer()
 int test_save_load_network()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5, "relu", "mse"), "Failed to initialize network")
+    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
@@ -110,7 +110,7 @@ int test_matmul()
 int test_predict_errors()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 10, "relu", "mse"), "Failed to initialize network")
+    CHECK_ERROR(init_network(&network, 4, 10, "bs_relu", "bs_mse"), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 100), "Failed to add layer to network")

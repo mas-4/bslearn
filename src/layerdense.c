@@ -28,21 +28,21 @@ int alloc_layers(LayerDenseNetwork *network)
 
 double (*get_activation_func(char *activation))(double)
 {
-    if (strcmp(activation, "sigmoid") == 0)
+    if (strcmp(activation, "bs_sigmoid") == 0)
     {
-        return sigmoid;
+        return bs_sigmoid;
     }
-    else if (strcmp(activation, "relu") == 0)
+    else if (strcmp(activation, "bs_relu") == 0)
     {
-        return relu;
+        return bs_relu;
     }
-    else if (strcmp(activation, "leaky_relu") == 0)
+    else if (strcmp(activation, "bs_leaky_relu") == 0)
     {
-        return leaky_relu;
+        return bs_leaky_relu;
     }
     else if (strcmp(activation, "tanh") == 0)
     {
-        return tanh;
+        return bs_tanh;
     }
     else
     {
@@ -51,23 +51,23 @@ double (*get_activation_func(char *activation))(double)
     }
 }
 
-double (*get_activation_function_prime(char *loss))(double)
+double (*get_activation_function_prime(char *activation))(double)
 {
-    if (strcmp(loss, "sigmoid") == 0)
+    if (strcmp(activation, "bs_sigmoid") == 0)
     {
-        return sigmoid_prime;
+        return bs_sigmoid_p;
     }
-    else if (strcmp(loss, "relu") == 0)
+    else if (strcmp(activation, "bs_relu") == 0)
     {
-        return relu_prime;
+        return bs_relu_p;
     }
-    else if (strcmp(loss, "leaky_relu") == 0)
+    else if (strcmp(activation, "bs_leaky_relu") == 0)
     {
-        return leaky_relu_prime;
+        return bs_leaky_relu_p;
     }
-    else if (strcmp(loss, "tanh") == 0)
+    else if (strcmp(activation, "bs_tanh") == 0)
     {
-        return tanh_prime;
+        return bs_tanh_p;
     }
     else
     {
@@ -78,17 +78,17 @@ double (*get_activation_function_prime(char *loss))(double)
 
 double (*get_loss_func(char *loss))(double *, double *, size_t)
 {
-    if (strcmp(loss, "mse") == 0)
+    if (strcmp(loss, "bs_mse") == 0)
     {
-        return mse;
+        return bs_mse;
     }
-    else if (strcmp(loss, "mae") == 0)
+    else if (strcmp(loss, "bs_mae") == 0)
     {
-        return mae;
+        return bs_mae;
     }
-    else if (strcmp(loss, "binary_crossentropy") == 0)
+    else if (strcmp(loss, "bs_crossentropy") == 0)
     {
-        return binary_crossentropy;
+        return bs_crossentropy;
     }
     else
     {

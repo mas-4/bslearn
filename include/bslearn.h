@@ -45,24 +45,24 @@ int save_network(LayerDenseNetwork *network, const char *filename);
 int free_network(LayerDenseNetwork *network);
 int predict(LayerDenseNetwork *network, double *inputs, double *outputs);
 
-// sigmoid
-double sigmoid(double d);
-double sigmoid_prime(double d);
-// relu
-double relu(double d);
-double relu_prime(double d);
-// leaky relu
-double leaky_relu(double d);
-double leaky_relu_prime(double d);
+// bs_sigmoid
+double bs_sigmoid(double d);
+double bs_sigmoid_p(double d);
+// bs_relu
+double bs_relu(double d);
+double bs_relu_p(double d);
+// leaky bs_relu
+double bs_leaky_relu(double d);
+double bs_leaky_relu_p(double d);
 // tanh
-double tanh(double d);
-double tanh_prime(double d);
+double bs_tanh(double d);
+double bs_tanh_p(double d);
 
-// mse
-double mse(double *y, double *y_hat, size_t n);
-// mae
-double mae(double *y, double *y_hat, size_t n);
-// binary_crossentropy
-double binary_crossentropy(double *y, double *y_hat, size_t n);
+// bs_mse
+double bs_mse(double *y, double *y_hat, size_t n);
+// bs_mae
+double bs_mae(double *y, double *y_hat, size_t n);
+// bs_crossentropy
+double bs_crossentropy(double *y, double *y_hat, size_t n);
 
 #endif //BLUESKY_LEARN_LIBRARY_H
