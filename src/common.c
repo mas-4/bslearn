@@ -6,16 +6,20 @@
 #include <mkl.h>
 #else
 #include <stdlib.h>
+#include <math.h>
 #endif
 
 #include "common.h"
 #include "constants.h"
+
 #define BS_LOGGER_H_IMPL
+
 #include "logger.h"
 
-#ifdef USE_MKL
+// <editor-fold desc="randoms">
 int get_rng(double *arr, size_t n)
 {
+#ifdef USE_MKL
     VSLStreamStatePtr stream;
     int status = vslNewStream(&stream, VSL_BRNG_MT19937, BSLEARN_SEED);
     if (status != VSL_STATUS_OK)
@@ -31,11 +35,7 @@ int get_rng(double *arr, size_t n)
     }
     // free VSLStreamStatePtr
     vslDeleteStream(&stream);
-    return 0;
-}
 #else // USE_MKL
-int get_rng(double *arr, size_t n)
-{
     double min = 0.0;
     double max = 1.0;
     double range = max - min;
@@ -44,11 +44,173 @@ int get_rng(double *arr, size_t n)
     {
         arr[i] = min + (rand() / div);
     }
+#endif // USE_MKL
     return 0;
 }
-#endif
+// </editor-fold>
 
-double sigmoid_prime(double d)
+// <editor-fold desc="matmuls">
+int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output)
+{
+#ifdef USE_MKL
+    cblas_dgemm(
+            CblasRowMajor,
+            CblasNoTrans,
+            CblasNoTrans,
+            (int)a_rows,
+            (int)a_cols,
+            (int)a_cols,
+            1.0,
+            a,
+            (int)a_cols,
+            b,
+            (int)a_cols,
+            0.0,
+            output,
+            (int)a_cols
+    );
+#else // USE_MKL
+    for (size_t i = 0; i < a_rows; i++)
+    {
+        double sum = 0.0;
+        for (size_t j = 0; j < a_cols; j++)
+        {
+            sum += a[i * a_cols + j] * b[j];
+        }
+        output[i] = sum + c[i];
+    }
+#endif // USE_MKL
+    return 0;
+}
+
+// a: matrix
+// b: vector
+// c: vector
+int matvecmul_activate(
+        const double *a, const double *b, const double *c,
+        size_t a_rows, size_t a_cols,
+        double (*activate)(double), double *out
+)
+{
+#ifdef USE_MKL
+    cblas_dgemv(
+            CblasRowMajor,
+            CblasNoTrans,
+            (int)a_rows,
+            (int)a_cols,
+            1.0,
+            a,
+            (int)a_cols,
+            b,
+            1,
+            0.0,
+            out,
+            1
+    );
+    for (size_t i = 0; i < a_rows; i++)
+    {
+        out[i] = activate(out[i] + c[i]);
+    }
+#else // USE_MKL
+    for (size_t i = 0; i < a_rows; i++)
+    {
+        double sum = 0.0;
+        for (size_t j = 0; j < a_cols; j++)
+        {
+            sum += a[i * a_cols + j] * b[j];
+        }
+        out[i] = activate(sum + c[i]);
+    }
+    return 0;
+#endif // USE_MKL
+}
+// </editor-fold>
+
+// <editor-fold desc="activations">
+double bs_sigmoid(double d)
+{
+    return 1.0 / (1.0 + exp(-d));
+}
+
+double bs_sigmoid_p(double d)
 {
     return 0;
 }
+
+double bs_relu(double d)
+{
+    return d > 0 ? d : 0;
+}
+double bs_relu_p(double d)
+{
+    return d > 0 ? 1 : 0;
+}
+
+double bs_leaky_relu(double d)
+{
+    return d > 0 ? d : 0.01 * d;
+}
+
+double bs_leaky_relu_p(double d)
+{
+    return d > 0 ? 1 : 0.01;
+}
+
+double bs_tanh(double d)
+{
+    return (exp(d) - exp(-d)) / (exp(d) + exp(-d));
+}
+
+double bs_tanh_p(double d)
+{
+    return 1 - pow(tanh(d), 2);
+}
+// </editor-fold>
+
+
+// <editor-fold desc="losses">
+double bs_mse(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += pow(y[i] - y_hat[i], 2);
+    }
+    return sum / (double)n;
+}
+
+double bs_mae(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += fabs(y[i] - y_hat[i]);
+    }
+    return sum / (double)n;
+}
+
+double bs_crossentropy(const double *y, const double *y_hat, size_t n)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < n; i++)
+    {
+        sum += y[i] * log(y_hat[i]);
+    }
+    return -sum / (double)n;
+}
+// </editor-fold>
+
+// <editor-fold desc="miscellaneous">
+int print_matrix(const double *arr, size_t rows, size_t cols)
+{
+    for (size_t i = 0; i < rows; i++)
+    {
+        for (size_t j = 0; j < cols; j++)
+        {
+            printf("%0.5f ", arr[i * cols + j]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
+// </editor-fold>

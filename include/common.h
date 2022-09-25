@@ -8,20 +8,14 @@
 
 int get_rng(double *arr, size_t n);
 
-// Activation Functions
-
-// sigmoid
-double sigmoid(double d);
-double sigmoid_prime(double d);
-// relu
-double relu(double d);
-double relu_prime(double d);
-// leaky relu
-double leaky_relu(double d);
-double leaky_relu_prime(double d);
-// tanh
-double tanh(double d);
-double tanh_prime(double d);
+// A * b + c
+int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output);
+int matvecmul_activate(
+        const double *a, const double *b, const double *c,
+        size_t a_rows, size_t a_cols,
+        double (*activate)(double), double *out
+);
+int print_matrix(const double *a, size_t rows, size_t cols);
 
 
 #endif //BSLEARN_TESTS_COMMON_H
