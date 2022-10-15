@@ -10,8 +10,8 @@
     #define USE_LAPACK
 #else
     #include <stdlib.h>
-    #include <math.h>
 #endif
+#include <math.h>
 
 #ifdef USE_LAPACK
 #include "constants.h"
@@ -36,7 +36,7 @@ int get_rng(double *arr, size_t n)
         log_warn("MKL RNG error");
         goto mklend;
     }
-    status = vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n, arr, 0, 1);
+    status = vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, (long long)n, arr, 0, 1);
     mklend:
     vslDeleteStream(&stream);
     if (status == VSL_STATUS_OK) {
@@ -44,10 +44,15 @@ int get_rng(double *arr, size_t n)
     }
 #endif
 #ifdef USE_LAPACK
-    int seed = BSLEARN_SEED;
-    int one = 1;
-    int n_int = (int)n;
+    long long seed = (long long) BSLEARN_SEED;
+    long long one = 1;
+    long long n_int = (long long) n;
+    #ifdef __APPLE__
     status = dlarnv_(&one, &seed, &n_int, arr);
+    #else
+    dlarnv_(&one, &seed, &n_int, arr);
+    status = errno;
+    #endif
     if (status == 0) {
         return status;
     }
