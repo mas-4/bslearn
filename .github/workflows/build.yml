@@ -24,7 +24,7 @@ jobs:
       - name: Test
         run: ./build/test
 
-  linux-mkl:
+  gcc-mkl:
     runs-on: ubuntu-latest
     env:
       CC: gcc
@@ -42,6 +42,24 @@ jobs:
       - name: Test
         run: ./build/test
 
+  gcc-lapack:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
+      - name: set up mkl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libblas-dev liblapack-dev
+      - name: CMake Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
+      - name: CMake build
+        run: cmake --build build
+      - name: Test
+        run: ./build/test
+
   clang:
     runs-on: ubuntu-latest
     env:
@@ -49,6 +67,42 @@ jobs:
     steps:
       - name: checkout project code
         uses: actions/checkout@v2
+      - name: CMake Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
+      - name: CMake build
+        run: cmake --build build
+      - name: Test
+        run: ./build/test
+
+  clang-mkl:
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
+      - name: set up mkl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y intel-mkl-full
+      - name: CMake Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
+      - name: CMake build
+        run: cmake --build build
+      - name: Test
+        run: ./build/test
+
+  clang-lapack:
+    runs-on: ubuntu-latest
+    env:
+      CC: clang
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
+      - name: set up mkl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libblas-dev liblapack-dev
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
       - name: CMake build
