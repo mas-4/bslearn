@@ -15,16 +15,30 @@ jobs:
     env:
       CC: gcc
     steps:
-
       - name: checkout project code
         uses: actions/checkout@v2
-
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
-
       - name: CMake build
         run: cmake --build build
+      - name: Test
+        run: ./build/test
 
+  linux-mkl:
+    runs-on: ubuntu-latest
+    env:
+      CC: gcc
+    steps:
+      - name: checkout project code
+        uses: actions/checkout@v2
+      - name: set up mkl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y intel-mkl-full
+      - name: CMake Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
+      - name: CMake build
+        run: cmake --build build
       - name: Test
         run: ./build/test
 
@@ -35,13 +49,10 @@ jobs:
     steps:
       - name: checkout project code
         uses: actions/checkout@v2
-
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
-
       - name: CMake build
         run: cmake --build build
-
       - name: Test
         run: ./build/test
 
@@ -52,13 +63,10 @@ jobs:
     steps:
       - name: checkout project code
         uses: actions/checkout@v2
-
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
-
       - name: CMake build
         run: cmake --build build
-
       - name: Test
         run: ./build/test
 
@@ -69,13 +77,10 @@ jobs:
     steps:
       - name: checkout project code
         uses: actions/checkout@v2
-
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
-
       - name: CMake build
         run: cmake --build build --config ${{ env.CONFIGURATION }}
-
       - name: Test
         run: |
           .\build\${{ env.CONFIGURATION }}\test.exe

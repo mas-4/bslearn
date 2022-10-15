@@ -25,6 +25,7 @@ void log_debug(const char *msg);
 #ifdef BS_LOGGER_H_IMPL
 
 #include <stdio.h>
+#include <string.h>
 
 #define RED   "\x1B[31m"
 #define GREEN "\x1B[32m"
