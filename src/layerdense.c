@@ -369,33 +369,77 @@ int predict(LayerDenseNetwork *network, const double *inputs, double *outputs, s
     return 0;
 }
 
-/*
-
-int backprop(LayerDenseNetwork *network)
+int shuffle(double *x_train, double *y_train, size_t n_samples, size_t n_inputs, size_t n_outputs)
 {
-    if (network == NULL)
+    if (x_train == NULL || y_train == NULL || n_samples == 0 || n_inputs == 0 || n_outputs == 0)
     {
-        log_error("backpropagation: Invalid arguments");
+        log_error("shuffle: Invalid arguments");
         return 1;
     }
+    size_t n_features = n_inputs + n_outputs;
+    double *temp_x = malloc(sizeof(double) * n_features);
+    double *temp_y = malloc(sizeof(double) * n_features);
+    for (size_t i = 0; i < n_samples; i++)
+    {
+        size_t j = rand() % n_samples;
+        memcpy(temp_x, x_train + i * n_features, sizeof(double) * n_features);
+        memcpy(x_train + i * n_features, x_train + j * n_features, sizeof(double) * n_features);
+        memcpy(x_train + j * n_features, temp_x, sizeof(double) * n_features);
+        memcpy(temp_y, y_train + i * n_features, sizeof(double) * n_features);
+        memcpy(y_train + i * n_features, y_train + j * n_features, sizeof(double) * n_features);
+        memcpy(y_train + j * n_features, temp_y, sizeof(double) * n_features);
+    }
+    free(temp_x);
+    free(temp_y);
     return 0;
+}
+
+int backprop(LayerDenseNetwork *network, const double *y_train, int batch_sz)
+{
+    if (network == NULL || y_train == NULL || batch_sz == 0)
+    {
+        log_error("backprop: Invalid arguments");
+        return 1;
+    }
+    // calculate loss
+    double loss = network->loss_func(network->layers[network->num_layers - 1].output, y_train, batch_sz);
+
+
 }
 
 int fit(LayerDenseNetwork *network, const double *x_train, const double *y_train, size_t n_samples)
 {
-    log_fatal("fit: Not implemented");
-    return 1;
     if (network == NULL || x_train == NULL || y_train == NULL)
     {
         log_error("fit: Invalid arguments");
         return 1;
     }
-    double *outputs = malloc(sizeof(double) * network->layers[network->num_layers - 1].n_nodes);
-    for (size_t i = 0; i < n_samples; i++)
+    double *x_train_copy = malloc(sizeof(double) * n_samples * network->layers[0].n_inputs);
+    memcpy(x_train_copy, x_train, sizeof(double) * n_samples * network->layers[0].n_inputs);
+    double *y_train_copy = malloc(sizeof(double) * n_samples * network->layers[network->num_layers - 1].n_nodes);
+    memcpy(y_train_copy, y_train, sizeof(double) * n_samples * network->layers[network->num_layers - 1].n_nodes);
+    for (size_t epoch = 0; epoch < network->n_epochs; epoch++)
     {
-        predict(network, &x_train[i * network->layers[0].n_inputs], outputs);
+        shuffle(
+                x_train_copy,
+                y_train_copy,
+                n_samples,
+                network->layers[0].n_inputs,
+                network->layers[network->num_layers - 1].n_nodes);
+        for (size_t i = 0; i < n_samples; i += network->batch_size)
+        {
+            size_t batch_sz = network->batch_size;
+            if (i + network->batch_size > n_samples)
+            {
+                batch_sz = n_samples - i;
+            }
+            predict(network, x_train_copy + i * network->layers[0].n_inputs, network->layers[0].output, batch_sz);
+            backprop(network, y_train_copy + i * network->layers[network->num_layers - 1].n_nodes, batch_sz);
+            // backpropagation
+            // TODO
+        }
     }
-    backprop(network);
+    free(x_train_copy);
+    free(y_train_copy);
     return 0;
 }
-*/
