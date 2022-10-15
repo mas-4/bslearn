@@ -153,8 +153,7 @@ int matmul_activate(
             {
                 sum += A[row * k + i] * B[i * n + col];
             }
-            double res = activate(sum + c[col]);
-            output[row * n + col] = res;
+            output[row * n + col] = activate(sum + c[row]);
         }
     }
     return 0;

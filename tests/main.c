@@ -97,11 +97,11 @@ int test_matmul()
     double b[] = {1, 0, 0,
                   0, 1, 0,
                   0, 0, 1};
-    double c[] = {1, 1, 1};
+    double c[] = {1, 2, 3};
     double output[9] = {0};
     double answer[9] = {1, 2, 3,
-                        4, 5, 6,
-                        7, 8, 9};
+                        5, 6, 7,
+                        9, 10, 11};
     CHECK_ERROR(matmul_activate(a, b, c, output, m, n, n, bs_relu), "Failed to matmul")
     for (size_t i = 0; i < 3 * 3; i++)
     {
