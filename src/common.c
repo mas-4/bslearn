@@ -3,18 +3,21 @@
 //
 
 #ifdef USE_MKL
-    #define USE_LAPACK
     #include <mkl.h>
+    #define USE_LAPACK
 #elif USE_ACCELERATE
     #include <Accelerate/Accelerate.h>
     #define USE_LAPACK
+#elif USE_LAPACK // fallback to regular lapack/cblas
+    #include <lapack.h>
+    #include <cblas.h>
 #else
     #include <stdlib.h>
 #endif
 #include <math.h>
 
 #ifdef USE_LAPACK
-#include "constants.h"
+    #include "constants.h"
 #endif
 
 #include <errno.h>
@@ -43,20 +46,31 @@ int get_rng(double *arr, size_t n)
         return status;
     }
 #endif
+
 #ifdef USE_LAPACK
-    long long seed = (long long) BSLEARN_SEED;
-    long long one = 1;
-    long long n_int = (long long) n;
+    #ifdef USE_MKL
+    #define dlarn_int long long
+    #else
+    #define dlarn_int int
+    #endif
+
+    dlarn_int seed = BSLEARN_SEED;
+    dlarn_int one = 1;
+    dlarn_int n_int = (int) n;
+
     #ifdef __APPLE__
-    status = dlarnv_(&one, &seed, &n_int, arr);
+    status = dlarnv_(&one, &seed, &n_int, arr); // apple returns a status
     #else
     dlarnv_(&one, &seed, &n_int, arr);
     status = errno;
     #endif
+
     if (status == 0) {
         return status;
     }
 #endif
+
+    // fallback to rand
     status = 0;
     for (size_t i = 0; i < n; i++)
     {
