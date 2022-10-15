@@ -8,10 +8,10 @@
 
 int get_rng(double *arr, size_t n);
 
-// A * b + c
+// A * B + c
 int matmul_activate(
-        const double *a,
-        const double *b,
+        const double *A,
+        const double *B,
         const double *c,
         double *output,
         size_t m,

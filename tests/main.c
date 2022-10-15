@@ -17,7 +17,7 @@ int test_add_layer()
 {
     int success = 0;
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse", 100, 0.1),
+    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse", 100, 0.1, 100),
                 "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
@@ -25,7 +25,7 @@ int test_add_layer()
     }
     for (size_t i = 0; i < network.num_layers; i++)
     {
-        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        for (size_t j = 0; j < network.layers[i].n_nodes; j++)
         {
             if (network.layers[i].weights[j] != 0.0)
             {
@@ -45,7 +45,7 @@ int test_add_layer()
 int test_save_load_network()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse", 100, 0.1),
+    CHECK_ERROR(init_network(&network, 4, 5, "bs_relu", "bs_mse", 100, 0.1, 100),
                 "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
@@ -58,18 +58,18 @@ int test_save_load_network()
     CHECK_ERROR(strcmp(network.loss, network2.loss) != 0, "Loss functions do not match")
     for (size_t i = 0; i < network.num_layers; i++)
     {
-        if (network.layers[i].nodes != network2.layers[i].nodes)
+        if (network.layers[i].n_nodes != network2.layers[i].n_nodes)
         {
-            CHECK_ERROR(network.layers[i].nodes != network2.layers[i].nodes, "Number of nodes does not match.")
+            CHECK_ERROR(network.layers[i].n_nodes != network2.layers[i].n_nodes, "Number of n_nodes does not match.")
         }
-        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        for (size_t j = 0; j < network.layers[i].n_nodes; j++)
         {
             if (network.layers[i].weights[j] != network2.layers[i].weights[j])
             {
                 CHECK_ERROR(network.layers[i].weights[j] != network2.layers[i].weights[j], "Weights mismatch.")
             }
         }
-        for (size_t j = 0; j < network.layers[i].nodes; j++)
+        for (size_t j = 0; j < network.layers[i].n_nodes; j++)
         {
             if (network.layers[i].biases[j] != network2.layers[i].biases[j])
             {
@@ -116,14 +116,15 @@ int test_matmul()
 int test_predict_errors()
 {
     LayerDenseNetwork network = {0};
-    CHECK_ERROR(init_network(&network, 4, 10, "bs_relu", "bs_mse", 100, 0.1), "Failed to initialize network")
+    CHECK_ERROR(init_network(&network, 4, 10, "bs_relu", "bs_mse", 100, 0.1, 100), "Failed to initialize network")
     for (int i = 0; i < 4; i++)
     {
         CHECK_ERROR(add_layer(&network, 100), "Failed to add layer to network")
     }
+    CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
     double input[4] = {1, 2, 3, 4};
-    double output[100] = {0};
-    CHECK_ERROR(predict(&network, input, output), "Failed to predict network")
+    double output[10] = {};
+    CHECK_ERROR(predict(&network, input, output, 1), "Failed to predict network")
     CHECK_ERROR(free_network(&network), "Failed to free network")
     return 0;
 }

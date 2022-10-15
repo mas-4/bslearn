@@ -22,9 +22,10 @@ typedef struct {
     double *weights;
     double *biases;
     double *output;
-    size_t nodes;
-    size_t prev_nodes;
-    size_t output_size;
+    size_t idx;
+    size_t n_nodes;
+    size_t n_inputs;
+    size_t output_sz;
 } Layer;
 
 typedef struct {
@@ -39,18 +40,24 @@ typedef struct {
     int loaded;
     size_t n_epochs;
     double learning_rate;
+    size_t batch_size;
 } LayerDenseNetwork;
 
 int init_network(
         LayerDenseNetwork *network,
-        size_t n_inputs, size_t n_nodes,
-        char *activation, char *loss,
-        size_t n_epochs, double learning_rate);
+        size_t n_inputs,
+        size_t n_nodes,
+        char *activation,
+        char *loss,
+        size_t n_epochs,
+        double learning_rate,
+        size_t batch_size);
+
 int add_layer(LayerDenseNetwork *network, size_t n_nodes);
 int load_network(LayerDenseNetwork *network, const char *filename);
 int save_network(LayerDenseNetwork *network, const char *filename);
 int free_network(LayerDenseNetwork *network);
-int predict(LayerDenseNetwork *network, const double *inputs, double *outputs);
+int predict(LayerDenseNetwork *network, const double *inputs, double *outputs, size_t batch_sz);
 int fit(LayerDenseNetwork *network, const double *x_train, const double *y_train, size_t n_samples);
 
 // bs_sigmoid

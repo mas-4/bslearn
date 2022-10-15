@@ -13,18 +13,22 @@
     #include <math.h>
 #endif
 
+#ifdef USE_LAPACK
+#include "constants.h"
+#endif
+
+#include <errno.h>
+
 #include "common.h"
 
 #define BS_LOGGER_H_IMPL
-#include <errno.h>
 
 #include "logger.h"
 #include "bslearn.h"
-#include "constants.h"
 
 int get_rng(double *arr, size_t n)
 {
-    int status = 0;
+    int status;
 #ifdef USE_MKL
     VSLStreamStatePtr stream;
     status = vslNewStream(&stream, VSL_BRNG_MT19937, 0);
@@ -36,7 +40,7 @@ int get_rng(double *arr, size_t n)
     mklend:
     vslDeleteStream(&stream);
     if (status == VSL_STATUS_OK) {
-        return 0;
+        return status;
     }
 #endif
 #ifdef USE_LAPACK
@@ -45,19 +49,23 @@ int get_rng(double *arr, size_t n)
     int n_int = (int)n;
     status = dlarnv_(&one, &seed, &n_int, arr);
     if (status == 0) {
-        return 0;
+        return status;
     }
 #endif
+    status = 0;
     for (size_t i = 0; i < n; i++)
     {
         arr[i] = (double)rand() / (double)RAND_MAX; // NOLINT(cert-msc50-cpp)
     }
-    return 0;
+    if (errno != 0) {
+        log_error("RNG error");
+        status = errno;
+    }
+    return status;
 }
 
-#ifdef USE_LAPACK
 // <editor-fold desc="matrix">
-
+#ifdef USE_LAPACK
 int matmul_activate(
         const double *a, // m x k
         const double *b, // k x n
@@ -108,31 +116,33 @@ int matmul_activate(
 #else // USE_LAPACK
 
 int matmul_activate(
-        const double *a,
-        const double *b,
-        double *c,
+        const double *A, // m x k mat
+        const double *B, // k x n mat
+        const double *c, // n-len vec
+        double *output,  // m x n mat
         size_t m,
         size_t n,
         size_t k,
         double (*activate)(double))
 {
-    for (size_t i = 0; i < m; i++)
+    for (size_t row = 0; row < m; row++)
     {
-        for (size_t j = 0; j < n; j++)
+        for (size_t col = 0; col < n; col++)
         {
             double sum = 0.0;
-            for (size_t l = 0; l < k; l++)
+            for (size_t i = 0; i < k; i++)
             {
-                sum += a[i * k + l] * b[l * n + j];
+                sum += A[row * k + i] * B[i * n + col];
             }
-            c[i * n + j] = activate(sum);
+            double res = activate(sum + c[col]);
+            output[row * n + col] = res;
         }
     }
     return 0;
 }
-// </editor-fold>
 
 #endif // USE_LAPACK
+// </editor-fold>
 
 // <editor-fold desc="activations">
 double bs_sigmoid(double d)
@@ -210,7 +220,7 @@ double bs_crossentropy(const double *y, const double *y_hat, size_t n)
 // <editor-fold desc="miscellaneous">
 int print_matrix(const double *arr, size_t rows, size_t cols)
 {
-    printf("%u x %u matrix\n", rows, cols);
+    printf("%zu x %zu matrix\n", rows, cols);
     for (size_t i = 0; i < rows; i++)
     {
         for (size_t j = 0; j < cols; j++)
