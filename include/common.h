@@ -8,13 +8,17 @@
 
 int get_rng(double *arr, size_t n);
 
-// A * b + c
-int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output);
-int matvecmul_activate(
-        const double *a, const double *b, const double *c,
-        size_t a_rows, size_t a_cols,
-        double (*activate)(double), double *out
-);
+// A * B + c
+int matmul_activate(
+        const double *A,
+        const double *B,
+        const double *c,
+        double *output,
+        size_t m,
+        size_t n,
+        size_t k,
+        double (*activate)(double));
+
 int print_matrix(const double *a, size_t rows, size_t cols);
 
 

@@ -25,6 +25,7 @@ void log_debug(const char *msg);
 #ifdef BS_LOGGER_H_IMPL
 
 #include <stdio.h>
+#include <string.h>
 
 #define RED   "\x1B[31m"
 #define GREEN "\x1B[32m"
@@ -38,7 +39,6 @@ enum LoggingLevel level = BS_LOG_LEVEL_INFO;
 void set_logging_level(enum LoggingLevel l) {
     level = l;
 }
-
 
 void log_debug(const char *msg)
 {
@@ -68,7 +68,7 @@ void log_error(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_ERROR)
     {
-        printf("%s[ERROR]%s: %s", RED, RESET, msg);
+        printf("%s[ERROR]%s: %s (%x)", RED, RESET, msg, strerror(errno));
     }
 }
 
@@ -76,7 +76,7 @@ void log_fatal(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_FATAL)
     {
-        printf("%s%s[FATAL]%s: %s", RED, BOLD, RESET, msg);
+        printf("%s%s[FATAL]%s: %s (%s)", RED, BOLD, RESET, msg, strerror(errno));
     }
 }
 

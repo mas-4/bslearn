@@ -22,8 +22,10 @@ typedef struct {
     double *weights;
     double *biases;
     double *output;
-    size_t nodes;
-    size_t prev_nodes;
+    size_t idx;
+    size_t n_nodes;
+    size_t n_inputs;
+    size_t output_sz;
 } Layer;
 
 typedef struct {
@@ -34,16 +36,29 @@ typedef struct {
     char *loss;
     double (*activation_func)(double);
     double (*activation_func_prime)(double);
-    double (*loss_func)(double*, double*, size_t);
+    double (*loss_func)(const double*, const double*, size_t);
     int loaded;
+    size_t n_epochs;
+    double learning_rate;
+    size_t batch_size;
 } LayerDenseNetwork;
 
-int init_network(LayerDenseNetwork *network, size_t n_inputs, size_t n_nodes, char *activation, char *loss);
+int init_network(
+        LayerDenseNetwork *network,
+        size_t n_inputs,
+        size_t n_nodes,
+        char *activation,
+        char *loss,
+        size_t n_epochs,
+        double learning_rate,
+        size_t batch_size);
+
 int add_layer(LayerDenseNetwork *network, size_t n_nodes);
 int load_network(LayerDenseNetwork *network, const char *filename);
 int save_network(LayerDenseNetwork *network, const char *filename);
 int free_network(LayerDenseNetwork *network);
-int predict(LayerDenseNetwork *network, double *inputs, double *outputs);
+int predict(LayerDenseNetwork *network, const double *inputs, double *outputs, size_t batch_sz);
+int fit(LayerDenseNetwork *network, const double *x_train, const double *y_train, size_t n_samples);
 
 // bs_sigmoid
 double bs_sigmoid(double d);
@@ -59,10 +74,10 @@ double bs_tanh(double d);
 double bs_tanh_p(double d);
 
 // bs_mse
-double bs_mse(double *y, double *y_hat, size_t n);
+double bs_mse(const double *y, const double *y_hat, size_t n);
 // bs_mae
-double bs_mae(double *y, double *y_hat, size_t n);
+double bs_mae(const double *y, const double *y_hat, size_t n);
 // bs_crossentropy
-double bs_crossentropy(double *y, double *y_hat, size_t n);
+double bs_crossentropy(const double *y, const double *y_hat, size_t n);
 
 #endif //BLUESKY_LEARN_LIBRARY_H
