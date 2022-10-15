@@ -3,128 +3,136 @@
 //
 
 #ifdef USE_MKL
-#include <mkl.h>
+    #define USE_LAPACK
+    #include <mkl.h>
+#elif USE_ACCELERATE
+    #include <Accelerate/Accelerate.h>
+    #define USE_LAPACK
 #else
-#include <stdlib.h>
-#include <math.h>
+    #include <stdlib.h>
+    #include <math.h>
 #endif
 
 #include "common.h"
-#include "constants.h"
 
 #define BS_LOGGER_H_IMPL
+#include <errno.h>
 
 #include "logger.h"
+#include "bslearn.h"
+#include "constants.h"
 
-// <editor-fold desc="randoms">
 int get_rng(double *arr, size_t n)
 {
+    int status = 0;
 #ifdef USE_MKL
     VSLStreamStatePtr stream;
-    int status = vslNewStream(&stream, VSL_BRNG_MT19937, BSLEARN_SEED);
-    if (status != VSL_STATUS_OK)
-    {
-        log_error("get_rng: Failed to create stream");
-        return status;
+    status = vslNewStream(&stream, VSL_BRNG_MT19937, 0);
+    if (status != VSL_STATUS_OK) {
+        log_warn("MKL RNG error");
+        goto mklend;
     }
-    status = vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, (int)n, arr, 0, 1);
-    if (status != VSL_STATUS_OK)
-    {
-        log_error("get_rng: Failed to generate random numbers");
-        return status;
-    }
-    // free VSLStreamStatePtr
+    status = vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, stream, n, arr, 0, 1);
+    mklend:
     vslDeleteStream(&stream);
-#else // USE_MKL
-    double min = 0.0;
-    double max = 1.0;
-    double range = max - min;
-    double div = RAND_MAX / range;
+    if (status == VSL_STATUS_OK) {
+        return 0;
+    }
+#endif
+#ifdef USE_LAPACK
+    int seed = BSLEARN_SEED;
+    int one = 1;
+    int n_int = (int)n;
+    status = dlarnv_(&one, &seed, &n_int, arr);
+    if (status == 0) {
+        return 0;
+    }
+#endif
     for (size_t i = 0; i < n; i++)
     {
-        arr[i] = min + (rand() / div);
+        arr[i] = (double)rand() / (double)RAND_MAX; // NOLINT(cert-msc50-cpp)
     }
-#endif // USE_MKL
     return 0;
 }
-// </editor-fold>
 
-// <editor-fold desc="matmuls">
-int matvecmul(const double *a, const double *b, const double *c, size_t a_rows, size_t a_cols, double *output)
+#ifdef USE_LAPACK
+// <editor-fold desc="matrix">
+
+int matmul_activate(
+        const double *a, // m x k
+        const double *b, // k x n
+        const double *c, // n-len, biases
+        double *output, // m x n
+        size_t m,
+        size_t n,
+        size_t k,
+        double (*activate)(double))
 {
-#ifdef USE_MKL
+    double alpha = 1.0, beta = 1.0;
+    // copy C into every column of output
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < m; j++)
+        {
+            output[i * m + j] = c[i];
+        }
+    }
+
     cblas_dgemm(
             CblasRowMajor,
             CblasNoTrans,
             CblasNoTrans,
-            (int)a_rows,
-            (int)a_cols,
-            (int)a_cols,
-            1.0,
+            (int)m,
+            (int)n,
+            (int)k,
+            alpha,
             a,
-            (int)a_cols,
+            (int)k,
             b,
-            (int)a_cols,
-            0.0,
+            (int)n,
+            beta,
             output,
-            (int)a_cols
-    );
-#else // USE_MKL
-    for (size_t i = 0; i < a_rows; i++)
-    {
-        double sum = 0.0;
-        for (size_t j = 0; j < a_cols; j++)
-        {
-            sum += a[i * a_cols + j] * b[j];
-        }
-        output[i] = sum + c[i];
+            (int)n);
+
+    if (errno != 0) {
+        log_error("cblas_dgemm error");
+        return -1;
     }
-#endif // USE_MKL
+    for (size_t i = 0; i < m * n; i++)
+    {
+        output[i] = activate(output[i]);
+    }
     return 0;
 }
 
-// a: matrix
-// b: vector
-// c: vector
-int matvecmul_activate(
-        const double *a, const double *b, const double *c,
-        size_t a_rows, size_t a_cols,
-        double (*activate)(double), double *out
-)
+#else // USE_LAPACK
+
+int matmul_activate(
+        const double *a,
+        const double *b,
+        double *c,
+        size_t m,
+        size_t n,
+        size_t k,
+        double (*activate)(double))
 {
-#ifdef USE_MKL
-    cblas_dgemv(
-            CblasRowMajor,
-            CblasNoTrans,
-            (int)a_rows,
-            (int)a_cols,
-            1.0,
-            a,
-            (int)a_cols,
-            b,
-            1,
-            0.0,
-            out,
-            1
-    );
-    for (size_t i = 0; i < a_rows; i++)
+    for (size_t i = 0; i < m; i++)
     {
-        out[i] = activate(out[i] + c[i]);
-    }
-#else // USE_MKL
-    for (size_t i = 0; i < a_rows; i++)
-    {
-        double sum = 0.0;
-        for (size_t j = 0; j < a_cols; j++)
+        for (size_t j = 0; j < n; j++)
         {
-            sum += a[i * a_cols + j] * b[j];
+            double sum = 0.0;
+            for (size_t l = 0; l < k; l++)
+            {
+                sum += a[i * k + l] * b[l * n + j];
+            }
+            c[i * n + j] = activate(sum);
         }
-        out[i] = activate(sum + c[i]);
     }
     return 0;
-#endif // USE_MKL
 }
 // </editor-fold>
+
+#endif // USE_LAPACK
 
 // <editor-fold desc="activations">
 double bs_sigmoid(double d)
@@ -134,7 +142,7 @@ double bs_sigmoid(double d)
 
 double bs_sigmoid_p(double d)
 {
-    return 0;
+    return bs_sigmoid(d) * (1.0 - bs_sigmoid(d));
 }
 
 double bs_relu(double d)
@@ -166,7 +174,6 @@ double bs_tanh_p(double d)
     return 1 - pow(tanh(d), 2);
 }
 // </editor-fold>
-
 
 // <editor-fold desc="losses">
 double bs_mse(const double *y, const double *y_hat, size_t n)
@@ -203,6 +210,7 @@ double bs_crossentropy(const double *y, const double *y_hat, size_t n)
 // <editor-fold desc="miscellaneous">
 int print_matrix(const double *arr, size_t rows, size_t cols)
 {
+    printf("%u x %u matrix\n", rows, cols);
     for (size_t i = 0; i < rows; i++)
     {
         for (size_t j = 0; j < cols; j++)

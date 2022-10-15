@@ -39,7 +39,6 @@ void set_logging_level(enum LoggingLevel l) {
     level = l;
 }
 
-
 void log_debug(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_DEBUG)
@@ -68,7 +67,7 @@ void log_error(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_ERROR)
     {
-        printf("%s[ERROR]%s: %s", RED, RESET, msg);
+        printf("%s[ERROR]%s: %s (%m)", RED, RESET, msg);
     }
 }
 
@@ -76,7 +75,7 @@ void log_fatal(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_FATAL)
     {
-        printf("%s%s[FATAL]%s: %s", RED, BOLD, RESET, msg);
+        printf("%s%s[FATAL]%s: %s (%m)", RED, BOLD, RESET, msg);
     }
 }
 
