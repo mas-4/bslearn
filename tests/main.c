@@ -98,7 +98,7 @@ int test_matmul()
                   0, 1, 0,
                   0, 0, 1};
     double c[] = {1, 1, 1};
-    double output[9] = {};
+    double output[9] = {0};
     double answer[9] = {1, 2, 3,
                         4, 5, 6,
                         7, 8, 9};
@@ -123,7 +123,7 @@ int test_predict_errors()
     }
     CHECK_ERROR(add_layer(&network, 10), "Failed to add layer to network")
     double input[4] = {1, 2, 3, 4};
-    double output[10] = {};
+    double output[10] = {0};
     CHECK_ERROR(predict(&network, input, output, 1), "Failed to predict network")
     CHECK_ERROR(free_network(&network), "Failed to free network")
     return 0;

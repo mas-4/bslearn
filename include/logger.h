@@ -67,7 +67,7 @@ void log_error(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_ERROR)
     {
-        printf("%s[ERROR]%s: %s (%m)", RED, RESET, msg);
+        printf("%s[ERROR]%s: %s (%x)", RED, RESET, msg, strerror(errno));
     }
 }
 
@@ -75,7 +75,7 @@ void log_fatal(const char *msg)
 {
     if (level <= BS_LOG_LEVEL_FATAL)
     {
-        printf("%s%s[FATAL]%s: %s (%m)", RED, BOLD, RESET, msg);
+        printf("%s%s[FATAL]%s: %s (%s)", RED, BOLD, RESET, msg, strerror(errno));
     }
 }
 
