@@ -52,7 +52,7 @@ jobs:
       - name: set up mkl
         run: |
           sudo apt-get update
-          sudo apt-get install -y libblas-dev liblapack-dev
+          sudo apt-get install -y libblas-dev liblapack-dev lapack
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
       - name: CMake build
@@ -102,7 +102,7 @@ jobs:
       - name: set up mkl
         run: |
           sudo apt-get update
-          sudo apt-get install -y libblas-dev liblapack-dev
+          sudo apt-get install -y libblas-dev liblapack-dev lapack
       - name: CMake Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.CONFIGURATION }}
       - name: CMake build
